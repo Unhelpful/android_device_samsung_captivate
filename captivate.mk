@@ -88,8 +88,8 @@ PRODUCT_PACKAGES += \
 
 # Misc other modules
 PRODUCT_PACKAGES += \
-	lights.s5pv210 \
-	overlay.s5pv210 \
+	lights.aries \
+	overlay.aries \
 	sensors.aries
 # Libs
 PRODUCT_PACKAGES += \
