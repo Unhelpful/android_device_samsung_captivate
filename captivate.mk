@@ -61,6 +61,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
 	device/samsung/captivate/cypress-touchkey.kl:system/usr/keylayout/cypress-touchkey.kl \
 	device/samsung/captivate/sec_jack.kl:system/usr/keylayout/sec_jack.kl \
+	device/samsung/captivate/aries-keypad.kl:system/usr/keylayout/aries-keypad.kl \
 	device/samsung/captivate/s3c-keypad.kl:system/usr/keylayout/s3c-keypad.kl
 
 # Generated kcm keymaps
