@@ -41,7 +41,7 @@
 DEVICE_PACKAGE_OVERLAYS := device/samsung/captivate/overlay
 
 # These are the hardware-specific configuration files
-PRODUCT_COPY_FILES := \
+PRODUCT_COPY_FILES = \
 	device/samsung/captivate/vold.fstab:system/etc/vold.fstab \
 	device/samsung/captivate/egl.cfg:system/lib/egl/egl.cfg
 
@@ -148,23 +148,32 @@ PRODUCT_TAGS += dalvik.gc.type-precise
 # PRODUCT_LOCALES expansion must not be a density.
 PRODUCT_LOCALES := hdpi
 
+hack_PRODUCT_OUT := out/target/product/captivate
 # kernel modules
 PRODUCT_COPY_FILES += \
-	device/samsung/captivate/bcm4329.ko:system/modules/bcm4329.ko \
-	device/samsung/captivate/cifs.ko:system/modules/cifs.ko \
-	device/samsung/captivate/tun.ko:system/modules/tun.ko
+	$(hack_PRODUCT_OUT)/kernel_build/drivers/net/wireless/bcm4329/bcm4329.ko:system/modules/bcm4329.ko \
+	$(hack_PRODUCT_OUT)/kernel_build/fs/cifs/cifs.ko:system/modules/cifs.ko \
+	$(hack_PRODUCT_OUT)/kernel_build/drivers/net/tun.ko:system/modules/tun.ko
 
 ifeq ($(TARGET_PREBUILT_ZIMAGE),)
-LOCAL_ZIMAGE := device/samsung/captivate/zImage
+LOCAL_ZIMAGE = $(hack_PRODUCT_OUT)/kernel
 else
 LOCAL_ZIMAGE := $(TARGET_PREBUILT_ZIMAGE)
 endif
 
-PRODUCT_COPY_FILES += \
-    $(LOCAL_ZIMAGE):zImage
+$(hack_PRODUCT_OUT)/kernel_build/drivers/net/wireless/bcm4329/bcm4329.ko: $(LOCAL_ZIMAGE)
+$(hack_PRODUCT_OUT)/kernel_build/fs/cifs/cifs.ko: $(LOCAL_ZIMAGE)
+$(hack_PRODUCT_OUT)/kernel_build/drivers/net/tun.ko: $(LOCAL_ZIMAGE)
 
-PRODUCT_COPY_FILES += \
-    $(LOCAL_ZIMAGE):kernel
+.PHONY: build_kernel
+
+$(hack_PRODUCT_OUT)/kernel_build/.config:
+	$(hide) mkdir -p $(PRODUCT_OUT)/kernel_build
+	$(hide) $(MAKE) -C kernel/samsung/2.6.35 O=$(ANDROID_BUILD_TOP)/$(PRODUCT_OUT)/kernel_build aries_captivate_defconfig
+
+$(hack_PRODUCT_OUT)/kernel: $(hack_PRODUCT_OUT)/recovery.img $(hack_PRODUCT_OUT)/kernel_build/.config build_kernel
+	$(hide) $(MAKE) -C kernel/samsung/2.6.35 O=$(ANDROID_BUILD_TOP)/$(PRODUCT_OUT)/kernel_build CROSS_COMPILE=$(ANDROID_BUILD_TOP)/$(subst -gcc,-,$(TARGET_CC))
+	$(hide) $(ACP) $(PRODUCT_OUT)/kernel_build/arch/arm/boot/zImage $(PRODUCT_OUT)/kernel
 
 # See comment at the top of this file. This is where the other
 # half of the device-specific product definition file takes care
